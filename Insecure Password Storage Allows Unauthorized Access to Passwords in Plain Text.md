@@ -33,11 +33,4 @@ https://github.com/Cyfrin/2023-10-PasswordStore/blob/856ed94bfcf1031bf9d13514cb2
 - No specific tool used. Manual code review was used to identify the vulnerability.
 
 ## Recommendations
-- To enhance the security of the "PasswordStore" smart contract and protect the stored password, we strongly recommend implementing hashing with keccak256 before storing the password. This measure will improve the confidentiality and integrity of the password.
-```
-function setPassword(string memory newPassword) external {
-    bytes32 passwordHash = keccak256(abi.encodePacked(newPassword));
-    s_password = passwordHash;
-    emit SetNetPassword();
-}
-```
+Due to this, the overall architecture of the protocol needs to be rethought. One could encrypt the password off-chain, and then store the encrypted password on-chain. This would require the user to remember another password off-chain to decrypt the password. However, you'd also likely want to remove the view function as you wouldn't want the user to accidently send a transaction with the password that decrypts the password.
