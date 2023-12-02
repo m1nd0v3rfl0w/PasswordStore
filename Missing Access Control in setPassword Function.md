@@ -18,7 +18,8 @@ This report identifies a vulnerability in the setPassword function of the "Passw
 - Contract Name: PasswordStore
 - Function Affected: setPassword(string memory newPassword)
 - Description: The setPassword function does not include a require statement or access control check, enabling unauthorized users to change the stored password. This oversight could potentially compromise the integrity of the password management system.
-``` 
+  
+```solidity
 function setPassword(string memory newPassword) external --> No access control implemented 
 { 
    s_password = newPassword; 
@@ -29,12 +30,30 @@ function setPassword(string memory newPassword) external --> No access control i
 ## Impact
 - Unauthorized users can change the stored password, potentially compromising the security of the data.
 
+## Proof of Concept
+- Add the following to the test suite
+<details>
+	
+```solidity
+function test_anyone_can_set_password_fuzz(address randomAddress) public{
+        vm.assume(randomAddress != owner);
+        vm.prank(randomAddress);
+        string memory expectedPassword = "myNewPassword";
+        passwordStore.setPassword(expectedPassword);
+        vm.prank(owner);
+        string memory actualPassword = passwordStore.getPassword();
+        assertEq(actualPassword,expectedPassword);
+    }
+```
+
+</details>
+
 ## Tools Used
 - No specific tool used. Vulnerability identified using manual code review.
 
 ## Recommendations
 - Add an access control modifier (e.g., "onlyOwner") to the setPassword function, ensuring that only the contract owner (the address that deployed the contract) can change the password.
-```
+```solidity
 function setPassword(string memory newPassword) external { 
         if (msg.sender != s_owner) {
             revert PasswordStore__NotOwner();
